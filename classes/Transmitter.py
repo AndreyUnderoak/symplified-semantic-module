@@ -18,9 +18,9 @@ class Transmitter():
         byte_pairs = self.array_to_bytes(pairs)
         print(byte_pairs)
         print(byte_pairs[0])
-        p_pairs = self.bytes_to_array(byte_pairs)
-        print(p_pairs)
-        # self.UDPClientSocket.sendto(byte_pairs, (self.address, self.port))
+        # p_pairs = self.bytes_to_array(byte_pairs)
+        # print(p_pairs)
+        self.UDPClientSocket.sendto(bytes(byte_pairs), (self.address, self.port))
 
     #Big endian
     def array_to_bytes(self, array):
