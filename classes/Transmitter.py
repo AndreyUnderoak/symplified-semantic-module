@@ -10,14 +10,14 @@ class Transmitter():
         self.address = address
         self.port = port
         #set buffer size = size of int type * pair * max_px_pairs
-        self.buffer_size = 4 * 2 * max_px_pairs
+        self.buffer_size = 4 * 5 * max_px_pairs
         #init socket
         self.UDPClientSocket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
 
     def send(self, pairs):
         byte_pairs = self.array_to_bytes(pairs)
-        print(byte_pairs)
-        print(byte_pairs[0])
+        # print(byte_pairs)
+        # print(byte_pairs[0])
         # p_pairs = self.bytes_to_array(byte_pairs)
         # print(p_pairs)
         self.UDPClientSocket.sendto(bytes(byte_pairs), (self.address, self.port))

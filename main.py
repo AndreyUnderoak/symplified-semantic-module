@@ -4,9 +4,13 @@ import math
 import sys 
 from termcolor import colored
 from classes.Topic_reader import Topic_reader, TopicException
+from classes.SemanticObject import SemanticObject
 from classes.Transmitter import Transmitter as Sender
 
 from numpy import array as nparray
+
+def flatten(xss):
+    return [x for xs in xss for x in xs]
 
 if(len(sys.argv) < 2):
     print(colored("Please write topic: python3 dataset_maker <files_name> <geo_topic> <image_topic> <auto/none>",'red'))
@@ -14,8 +18,10 @@ if(len(sys.argv) < 2):
 img_topic = sys.argv[1]
 topic_reader = Topic_reader(img_topic)
 
+max_pairs = 10
+
 #UDP Sender init
-sender = Sender("localhost", 8080, 1)
+sender = Sender("localhost", 8080, max_pairs)
 
 # message = [1000,1000, 388, 2103,1080,1920]
 # sender.send(message)
@@ -50,7 +56,9 @@ while True:
     except TopicException as e:
         # print(colored(e.message,'red'))
         continue
-    was_in_frame = False
+
+    message = []
+    num = 0
     # coordinates
     for r in results:
         boxes = r.boxes
@@ -77,13 +85,13 @@ while True:
             cls = int(box.cls[0])
             
             #can be chair
-            # if((classNames[cls]=="clock" or classNames[cls]=="person") and  not was_in_frame):
-            if((classNames[cls]=="chair" or classNames[cls]=="sofa") and  not was_in_frame):
-                was_in_frame = True
-                message = [xcell,ycell]
-                sender.send(message)
+            if((classNames[cls]=="bottle") and  num < max_pairs):
+                num+=1
+                message.append(SemanticObject(xcell,ycell, object_id=cls))
+                
                 # print(message)
                 print("Class name -->", classNames[cls])
+                print("Coors --> ", xcell, " ", ycell)
 
             # object details
             org = [x1, y1]
@@ -93,6 +101,15 @@ while True:
             thickness = 2
 
             cv2.putText(img, classNames[cls], org, font, fontScale, color, thickness)
+
+        print("Sending:")
+        l = []
+        for m in message:
+            l.append(m.to_list())
+
+        print(flatten(l))
+
+        sender.send(flatten(l))
 
     cv2.imshow('Display', img)
     if cv2.waitKey(1) == ord('q'):
